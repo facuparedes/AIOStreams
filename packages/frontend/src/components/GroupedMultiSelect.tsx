@@ -23,6 +23,13 @@ const GroupedMultiSelect: React.FC<GroupedMultiSelectProps> = ({
     setIsClient(true);
   }, []);
 
+  // Update groups when values prop changes
+  useEffect(() => {
+    if (values) {
+      setGroups(values);
+    }
+  }, [values]);
+
   // Add a new empty group
   const addGroup = () => {
     setGroups([...groups, []]);

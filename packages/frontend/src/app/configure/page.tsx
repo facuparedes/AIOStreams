@@ -165,6 +165,7 @@ export default function Configure() {
   const [excludedLanguages, setExcludedLanguages] = useState<string[] | null>(
     null
   );
+  const [showLanguageEmojis, setShowLanguageEmojis] = useState<boolean>(false);
   const [addons, setAddons] = useState<Config['addons']>([]);
   /*
   const [maxSize, setMaxSize] = useState<number | null>(null);
@@ -236,6 +237,13 @@ export default function Configure() {
       });
   }, []);
 
+  useEffect(() => {
+    // Reset showLanguageEmojis when formatter changes
+    if (formatter !== 'gdrive' && formatter !== 'minimalistic-gdrive') {
+      setShowLanguageEmojis(false);
+    }
+  }, [formatter]);
+
   const createConfig = (): Config => {
     const config = {
       apiKey: apiKey,
@@ -266,6 +274,10 @@ export default function Configure() {
           ? excludeFilters.map((filter) => filter.value)
           : null,
       formatter: formatter || 'gdrive',
+      showLanguageEmojis:
+        formatter === 'gdrive' || formatter === 'minimalistic-gdrive'
+          ? showLanguageEmojis
+          : false,
       mediaFlowConfig: {
         mediaFlowEnabled,
         proxyUrl: mediaFlowProxyUrl,
@@ -1081,23 +1093,7 @@ export default function Configure() {
             <div className={styles.settingDescription}>
               <h2 style={{ padding: '5px' }}>Formatter</h2>
               <p style={{ padding: '5px' }}>
-                Change how your stream results are f
-                <span
-                  onClick={() => {
-                    if (formatterOptions.includes('imposter')) {
-                      return;
-                    }
-                    showToast(
-                      "What's this doing here....?",
-                      'info',
-                      'ImposterFormatter'
-                    );
-                    setFormatterOptions([...formatterOptions, 'imposter']);
-                  }}
-                >
-                  ◌
-                </span>
-                rmatted.
+                Change how your stream results are formatted.
               </p>
             </div>
             <div className={styles.settingInput}>
@@ -1113,6 +1109,29 @@ export default function Configure() {
               </select>
             </div>
           </div>
+          {(formatter === 'gdrive' || formatter === 'minimalistic-gdrive') && (
+            <div className={styles.setting}>
+              <div className={styles.settingDescription}>
+                <h2 style={{ padding: '5px' }}>Show Language Emojis</h2>
+                <p style={{ padding: '5px' }}>
+                  Display language codes as emoji flags (e.g. GB → 🇬🇧, ES → 🇪🇸)
+                </p>
+              </div>
+              <div className={styles.checkboxSettingInput}>
+                <input
+                  type="checkbox"
+                  checked={showLanguageEmojis}
+                  onChange={(e) => setShowLanguageEmojis(e.target.checked)}
+                  style={{
+                    marginLeft: 'auto',
+                    marginRight: '20px',
+                    width: '25px',
+                    height: '25px',
+                  }}
+                />
+              </div>
+            </div>
+          )}
         </div>
 
         <div className={styles.section}>

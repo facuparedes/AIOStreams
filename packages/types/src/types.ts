@@ -131,10 +131,11 @@ export interface Config {
   sortBy: SortBy[];
   streamTypes: StreamType[];
   onlyShowCachedStreams: boolean;
-  prioritiseLanguage?: string; // from older configurations
+  prioritiseLanguage?: string;
   prioritisedLanguages: string[] | null;
   excludedLanguages: string[] | null;
   formatter: string;
+  showLanguageEmojis?: boolean;
   customFormatter?: {
     splitter: string; // e.g. ' - ', ' | ' etc. the string used to split the tags
     // we need to have a key for where the value has to be determined from the stream data.

@@ -239,9 +239,14 @@ export default function Configure() {
 
   useEffect(() => {
     // Reset showLanguageEmojis when formatter changes
-    if (formatter !== 'gdrive' && formatter !== 'minimalistic-gdrive') {
+    if (
+      formatter !== 'gdrive' &&
+      formatter !== 'minimalistic-gdrive' &&
+      showLanguageEmojis
+    ) {
       setShowLanguageEmojis(false);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [formatter]);
 
   const createConfig = (): Config => {

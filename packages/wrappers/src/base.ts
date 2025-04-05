@@ -381,6 +381,13 @@ export class BaseWrapper {
           )
           .join(' ')
       )
+      .filter((lang, index, self) => {
+        // Eliminar duplicados basados en el nombre del idioma
+        const normalizedLang = lang.toLowerCase();
+        return (
+          self.findIndex((l) => l.toLowerCase() === normalizedLang) === index
+        );
+      })
       .forEach((lang) => {
         if (lang && !parsedInfo.languages.includes(lang)) {
           parsedInfo.languages.push(lang);

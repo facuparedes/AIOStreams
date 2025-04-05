@@ -1,5 +1,10 @@
 import { ParsedStream } from '@aiostreams/types';
-import { formatDuration, formatSize, languageToEmoji } from './utils';
+import {
+  formatDuration,
+  formatSize,
+  languageToEmoji,
+  sortPrioritisedLanguages,
+} from './utils';
 import { serviceDetails } from '@aiostreams/utils';
 
 export function gdriveFormat(
@@ -75,7 +80,10 @@ export function gdriveFormat(
   }
 
   if (stream.languages.length !== 0) {
-    let languages = stream.languages;
+    let languages = sortPrioritisedLanguages(
+      stream.languages,
+      stream.prioritisedLanguages
+    );
     if (minimalistic && stream.showLanguageEmojis) {
       languages = languages.map(
         (language) => languageToEmoji(language) || language

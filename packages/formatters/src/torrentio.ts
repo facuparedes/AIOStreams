@@ -1,5 +1,5 @@
 import { ParsedStream } from '@aiostreams/types';
-import { formatSize, languageToEmoji } from './utils';
+import { formatSize, languageToEmoji, sortPrioritisedLanguages } from './utils';
 import { serviceDetails } from '@aiostreams/utils';
 
 export function torrentioFormat(stream: ParsedStream): {
@@ -62,7 +62,11 @@ export function torrentioFormat(stream: ParsedStream): {
     return emoji ? emoji : lang;
   });
   if (languageEmojis.length > 0) {
-    description += `\n${languageEmojis.join(' / ')}`;
+    let languages = sortPrioritisedLanguages(
+      languageEmojis,
+      stream.prioritisedLanguages
+    );
+    description += `\n${languages.join(' / ')}`;
   }
   return { name, description };
 }

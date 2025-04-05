@@ -1,5 +1,5 @@
 import { ParsedStream } from '@aiostreams/types';
-import { formatDuration, formatSize } from './utils';
+import { formatDuration, formatSize, sortPrioritisedLanguages } from './utils';
 
 const imposters = [
   'Disney+',
@@ -59,7 +59,10 @@ export function imposterFormat(stream: ParsedStream): {
   }
 
   if (stream.languages.length !== 0) {
-    let languages = stream.languages;
+    let languages = sortPrioritisedLanguages(
+      stream.languages,
+      stream.prioritisedLanguages
+    );
     description += `\n🔊 ${languages.join(' | ')}`;
   }
 

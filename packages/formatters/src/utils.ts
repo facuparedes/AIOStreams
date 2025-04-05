@@ -36,6 +36,20 @@ export function emojiToLanguage(emoji: string): string | undefined {
 export function codeToLanguage(code: string): string | undefined {
   return codeLanguageMap[code];
 }
+
+export function sortPrioritisedLanguages(
+  languages: string[],
+  prioritisedLanguages?: string[]
+): string[] {
+  if (!prioritisedLanguages || prioritisedLanguages.length === 0) {
+    return languages;
+  }
+  return [
+    ...languages.filter((lang) => prioritisedLanguages.includes(lang)),
+    ...languages.filter((lang) => !prioritisedLanguages.includes(lang)),
+  ];
+}
+
 /**
  * A mapping of language names to their corresponding emoji flags.
  *

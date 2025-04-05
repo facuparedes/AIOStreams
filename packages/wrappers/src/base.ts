@@ -255,6 +255,7 @@ export class BaseWrapper {
         indexers: indexer,
         duration: duration,
         personal: personal,
+        prioritisedLanguages: this.userConfig.prioritisedLanguages || undefined,
         showLanguageEmojis:
           this.userConfig.showLanguageEmojis &&
           (this.userConfig.formatter === 'gdrive' ||

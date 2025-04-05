@@ -1,5 +1,5 @@
 import { ParsedStream } from '@aiostreams/types';
-import { formatSize } from './utils';
+import { formatSize, sortPrioritisedLanguages } from './utils';
 import { serviceDetails } from '@aiostreams/utils';
 
 export function torboxFormat(stream: ParsedStream): {
@@ -24,7 +24,13 @@ export function torboxFormat(stream: ParsedStream): {
 
   let description: string = '';
 
-  description += `Quality: ${stream.quality}\nName: ${stream.filename}\nSize: ${formatSize(stream.size || 0)}\nLanguage: ${stream.languages.length > 0 ? stream.languages.join(', ') : 'Unknown'}`;
+  description += `Quality: ${stream.quality}\nName: ${stream.filename}\nSize: ${formatSize(stream.size || 0)}\nLanguage: `;
+
+  let languages = sortPrioritisedLanguages(
+    stream.languages,
+    stream.prioritisedLanguages
+  );
+  description += languages.length > 0 ? languages.join(', ') : 'Unknown';
 
   let streamType = stream.torrent
     ? 'Torrent'

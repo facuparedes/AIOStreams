@@ -14,7 +14,7 @@ import {
   Settings,
   createLogger,
 } from '@aiostreams/utils';
-import { emojiToLanguage, codeToLanguage } from '@aiostreams/formatters';
+import { emojiToLanguage, codeToLanguage, languageToEmoji } from '@aiostreams/formatters';
 
 const logger = createLogger('wrappers');
 
@@ -350,8 +350,14 @@ export class BaseWrapper {
       ...this.extractCountryCodes(description),
     ]
       .map(
-        (codeOrFlag) =>
-          emojiToLanguage(codeOrFlag) || codeToLanguage(codeOrFlag)
+        (codeOrFlag) => {
+          const languageName = emojiToLanguage(codeOrFlag) || codeToLanguage(codeOrFlag);
+          if (languageName) {
+            const emoji = languageToEmoji(languageName);
+            return emoji || languageName;
+          }
+          return undefined;
+        }
       )
       .filter((lang) => lang !== undefined)
       .map((lang) =>
@@ -434,7 +440,7 @@ export class BaseWrapper {
   }
 
   protected extractResolution(string: string): string | undefined {
-    const resolutionPattern = /(?:\d{3,4}(?:p)?|SD|HD|FHD|UHD|4K|8K)/gi;
+    const resolutionPattern = /(?:\d{3,4}(?:p)?|(?<!HDR|SDR|DV|WEB|REMUX)(?:SD|HD|FHD|UHD|4K|8K)(?!R|V|B|UX))/gi;
     const match = string.match(resolutionPattern);
 
     if (!match) return undefined;

@@ -90,8 +90,9 @@ const languageEmojiMap: Record<string, string> = {
   swedish: '🇸🇪',
   norwegian: '🇳🇴',
   malay: '🇲🇾',
-  latino: '💃🏻',
+  latino: '🇲🇽',
   Latino: '🇲🇽',
+  'Great Britain': '🇬🇧',
 };
 
 const codeLanguageMap: Record<string, string> = {
@@ -143,4 +144,5 @@ const codeLanguageMap: Record<string, string> = {
   MS: 'malay',
   LA: 'latino',
   MX: 'Latino',
+  GB: 'Great Britain',
 };

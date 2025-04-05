@@ -13,6 +13,7 @@ import {
   serviceDetails,
   Settings,
   createLogger,
+  normalizePrioritisedLanguages,
 } from '@aiostreams/utils';
 import {
   emojiToLanguage,

@@ -37,7 +37,7 @@ export interface ParsedStream extends ParsedNameData {
   externalUrl?: string;
   indexers?: string;
   personal?: boolean;
-  prioritisedLanguages?: string[];
+  prioritisedLanguages?: string[] | string[][];
   stream?: {
     subtitles?: Subtitle[];
     behaviorHints?: {
@@ -134,7 +134,7 @@ export interface Config {
   streamTypes: StreamType[];
   onlyShowCachedStreams: boolean;
   prioritiseLanguage?: string;
-  prioritisedLanguages: string[] | null;
+  prioritisedLanguages: string[] | string[][] | null;
   excludedLanguages: string[] | null;
   formatter: string;
   showLanguageEmojis: boolean;

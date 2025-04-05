@@ -40,6 +40,7 @@ import CredentialInput from '@/components/CredentialInput';
 import CreateableSelect from '@/components/CreateableSelect';
 import MultiSelect from '@/components/MutliSelect';
 import InstallWindow from '@/components/InstallWindow';
+import GroupedMultiSelect from '../../components/GroupedMultiSelect';
 
 const version = addonPackage.version;
 
@@ -159,9 +160,8 @@ export default function Configure() {
   const [services, setServices] = useState<Config['services']>(defaultServices);
   const [onlyShowCachedStreams, setOnlyShowCachedStreams] =
     useState<boolean>(false);
-  const [prioritisedLanguages, setPrioritisedLanguages] = useState<
-    string[] | null
-  >(null);
+  const [groupedPrioritisedLanguages, setGroupedPrioritisedLanguages] =
+    useState<string[][] | null>(null);
   const [excludedLanguages, setExcludedLanguages] = useState<string[] | null>(
     null
   );
@@ -261,7 +261,7 @@ export default function Configure() {
       encodes,
       sortBy: sortCriteria,
       onlyShowCachedStreams,
-      prioritisedLanguages,
+      prioritisedLanguages: groupedPrioritisedLanguages,
       excludedLanguages,
       maxMovieSize,
       minMovieSize,
@@ -532,15 +532,41 @@ export default function Configure() {
       setSortCriteria(loadValidSortCriteria(decodedConfig.sortBy));
       setOnlyShowCachedStreams(decodedConfig.onlyShowCachedStreams || false);
       // create an array for prioritised languages. if the old prioritiseLanguage is set, add it to the array
-      const finalPrioritisedLanguages =
-        decodedConfig.prioritisedLanguages || [];
+      let finalPrioritisedLanguages = decodedConfig.prioritisedLanguages || [];
+
+      // Convert legacy format (string with prioritiseLanguage)
       if (decodedConfig.prioritiseLanguage) {
-        finalPrioritisedLanguages.push(decodedConfig.prioritiseLanguage);
+        if (Array.isArray(finalPrioritisedLanguages[0])) {
+          (finalPrioritisedLanguages as string[][])[0].push(
+            decodedConfig.prioritiseLanguage
+          );
+        } else {
+          // Convert flat array to nested array format
+          const flatArray = finalPrioritisedLanguages as string[];
+          finalPrioritisedLanguages = [flatArray];
+          if (decodedConfig.prioritiseLanguage) {
+            (finalPrioritisedLanguages as string[][])[0].push(
+              decodedConfig.prioritiseLanguage
+            );
+          }
+        }
       }
-      setPrioritisedLanguages(
-        finalPrioritisedLanguages.filter((lang) =>
-          allowedLanguages.includes(lang)
-        ) || null
+
+      // Convert flat array to nested array if needed
+      if (
+        !Array.isArray(finalPrioritisedLanguages[0]) &&
+        finalPrioritisedLanguages.length > 0
+      ) {
+        finalPrioritisedLanguages = [finalPrioritisedLanguages as string[]];
+      }
+
+      // Process prioritisedLanguages - always as nested array
+      setGroupedPrioritisedLanguages(
+        (finalPrioritisedLanguages as string[][])
+          .map((group) =>
+            group.filter((lang) => allowedLanguages.includes(lang))
+          )
+          .filter((group) => group.length > 0) || null
       );
       setExcludedLanguages(
         decodedConfig.excludedLanguages?.filter((lang) =>
@@ -928,18 +954,17 @@ export default function Configure() {
                 Any results that are detected to have one of the prioritised
                 languages will be sorted according to your sort criteria. You
                 must have the <code>Langage</code> sort criteria enabled for
-                this to work. If there are multiple results with a different
-                prioritised language, the order is determined by the order of
-                the prioritised languages.
+                this to work. Languages in the same group have the same priority
+                level.
               </p>
             </div>
             <div>
-              <MultiSelect
+              <GroupedMultiSelect
                 options={allowedLanguages
                   .sort((a, b) => a.localeCompare(b))
                   .map((language) => ({ value: language, label: language }))}
-                setValues={setPrioritisedLanguages}
-                values={prioritisedLanguages || []}
+                setValues={setGroupedPrioritisedLanguages}
+                values={groupedPrioritisedLanguages}
               />
             </div>
           </div>

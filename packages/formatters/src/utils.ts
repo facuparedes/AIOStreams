@@ -1,3 +1,5 @@
+import { normalizePrioritisedLanguages } from '@aiostreams/utils';
+
 export function formatSize(bytes: number): string {
   if (bytes === 0) return '0 B';
   const k = 1024;
@@ -39,22 +41,28 @@ export function codeToLanguage(code: string): string | undefined {
 
 export function sortPrioritisedLanguages(
   languages: string[],
-  prioritisedLanguages?: string[]
+  prioritisedLanguages?: string[] | string[][] | null | undefined
 ): string[] {
   if (!prioritisedLanguages || prioritisedLanguages.length === 0) {
     return languages;
   }
 
-  // Create a map of language names to their priority index
-  const priorityMap = new Map(
-    prioritisedLanguages.map((lang, index) => {
+  // Normalize prioritisedLanguages to ensure it's always an array of arrays
+  const normalizedPrioritisedLanguages =
+    normalizePrioritisedLanguages(prioritisedLanguages) || [];
+
+  // Create a map of language names to their priority index (group index)
+  const priorityMap = new Map<string, number>();
+
+  normalizedPrioritisedLanguages.forEach((group, groupIndex) => {
+    group.forEach((lang) => {
       const normalized =
         Object.keys(languageEmojiMap).find(
           (key) => key.toLowerCase() === lang.toLowerCase()
         ) || lang;
-      return [normalized, index];
-    })
-  );
+      priorityMap.set(normalized, groupIndex);
+    });
+  });
 
   // Sort languages based on their priority index
   return [...languages].sort((a, b) => {

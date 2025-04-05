@@ -34,6 +34,7 @@ import {
   getTimeTakenSincePoint,
   Settings,
   createLogger,
+  normalizePrioritisedLanguages,
 } from '@aiostreams/utils';
 import { errorStream } from './responses';
 
@@ -43,6 +44,12 @@ export class AIOStreams {
   private config: Config;
 
   constructor(config: any) {
+    // Normalize prioritisedLanguages to ensure it's in the correct format
+    if (config.prioritisedLanguages) {
+      config.prioritisedLanguages = normalizePrioritisedLanguages(
+        config.prioritisedLanguages
+      );
+    }
     this.config = config;
   }
 
@@ -903,18 +910,22 @@ export class AIOStreams {
       // any file with a language in the prioritisedLanguages array should be prioritised
       // if both files contain a prioritisedLanguage, we compare the index of the highest priority language
 
+      // prioritisedLanguages is already normalized to array of arrays in the constructor
+      const prioritisedLanguages = this.config
+        .prioritisedLanguages as string[][];
+
+      // Function to check if a language is in the prioritised languages list
+      const isLanguagePrioritised = (lang: string) => {
+        return prioritisedLanguages.some((group) => group.includes(lang));
+      };
+
       const aHasPrioritisedLanguage =
-        a.languages.some((lang) =>
-          this.config.prioritisedLanguages?.includes(lang)
-        ) ||
-        (a.languages.length === 0 &&
-          this.config.prioritisedLanguages?.includes('Unknown'));
+        a.languages.some((lang) => isLanguagePrioritised(lang)) ||
+        (a.languages.length === 0 && isLanguagePrioritised('Unknown'));
+
       const bHasPrioritisedLanguage =
-        b.languages.some((lang) =>
-          this.config.prioritisedLanguages?.includes(lang)
-        ) ||
-        (b.languages.length === 0 &&
-          this.config.prioritisedLanguages?.includes('Unknown'));
+        b.languages.some((lang) => isLanguagePrioritised(lang)) ||
+        (b.languages.length === 0 && isLanguagePrioritised('Unknown'));
 
       if (aHasPrioritisedLanguage && !bHasPrioritisedLanguage) return -1;
       if (!aHasPrioritisedLanguage && bHasPrioritisedLanguage) return 1;
@@ -922,18 +933,24 @@ export class AIOStreams {
       if (aHasPrioritisedLanguage && bHasPrioritisedLanguage) {
         const getHighestPriorityLanguageIndex = (languages: string[]) => {
           if (languages.length === 0) {
-            const unknownIndex =
-              this.config.prioritisedLanguages!.indexOf('Unknown');
-            return unknownIndex !== -1
-              ? unknownIndex
-              : this.config.prioritisedLanguages!.length;
+            // Find the group index that contains 'Unknown'
+            const unknownGroupIndex = prioritisedLanguages.findIndex((group) =>
+              group.includes('Unknown')
+            );
+            return unknownGroupIndex !== -1
+              ? unknownGroupIndex
+              : prioritisedLanguages.length;
           }
-          return languages.reduce((minIndex, lang) => {
-            const index =
-              this.config.prioritisedLanguages?.indexOf(lang) ??
-              this.config.prioritisedLanguages!.length;
-            return index !== -1 ? Math.min(minIndex, index) : minIndex;
-          }, this.config.prioritisedLanguages!.length);
+
+          // Find the lowest group index that contains any of the languages
+          return languages.reduce((minGroupIndex, lang) => {
+            const groupIndex = prioritisedLanguages.findIndex((group) =>
+              group.includes(lang)
+            );
+            return groupIndex !== -1
+              ? Math.min(minGroupIndex, groupIndex)
+              : minGroupIndex;
+          }, prioritisedLanguages.length);
         };
 
         const aHighestPriorityLanguageIndex = getHighestPriorityLanguageIndex(

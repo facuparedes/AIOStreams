@@ -65,7 +65,6 @@ export const allowedLanguages = [
   'Norwegian',
   'Malay',
   'Latino',
-  'Great Britain',
   'Unknown',
   'Dual Audio',
   'Dubbed',

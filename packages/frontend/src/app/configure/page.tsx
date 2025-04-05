@@ -531,33 +531,31 @@ export default function Configure() {
       );
       setSortCriteria(loadValidSortCriteria(decodedConfig.sortBy));
       setOnlyShowCachedStreams(decodedConfig.onlyShowCachedStreams || false);
-      // create an array for prioritised languages. if the old prioritiseLanguage is set, add it to the array
       let finalPrioritisedLanguages = decodedConfig.prioritisedLanguages || [];
 
-      // Convert legacy format (string with prioritiseLanguage)
-      if (decodedConfig.prioritiseLanguage) {
-        if (Array.isArray(finalPrioritisedLanguages[0])) {
-          (finalPrioritisedLanguages as string[][])[0].push(
-            decodedConfig.prioritiseLanguage
-          );
-        } else {
-          // Convert flat array to nested array format
-          const flatArray = finalPrioritisedLanguages as string[];
-          finalPrioritisedLanguages = [flatArray];
-          if (decodedConfig.prioritiseLanguage) {
-            (finalPrioritisedLanguages as string[][])[0].push(
-              decodedConfig.prioritiseLanguage
-            );
-          }
-        }
-      }
-
-      // Convert flat array to nested array if needed
+      // Convert legacy format if needed
       if (
         !Array.isArray(finalPrioritisedLanguages[0]) &&
         finalPrioritisedLanguages.length > 0
       ) {
-        finalPrioritisedLanguages = [finalPrioritisedLanguages as string[]];
+        // Convert flat array to nested array, each language in its own group
+        finalPrioritisedLanguages = (finalPrioritisedLanguages as string[]).map(
+          (lang) => [lang]
+        );
+      }
+
+      // Add legacy prioritiseLanguage if it exists and isn't already included
+      if (decodedConfig.prioritiseLanguage) {
+        const priorityLang = decodedConfig.prioritiseLanguage;
+        // Check if this language already exists in any group
+        const langExists = (finalPrioritisedLanguages as string[][]).some(
+          (group) => group.includes(priorityLang)
+        );
+
+        if (!langExists) {
+          // Add as highest priority (first group)
+          (finalPrioritisedLanguages as string[][]).unshift([priorityLang]);
+        }
       }
 
       // Process prioritisedLanguages - always as nested array
@@ -568,6 +566,7 @@ export default function Configure() {
           )
           .filter((group) => group.length > 0) || null
       );
+
       setExcludedLanguages(
         decodedConfig.excludedLanguages?.filter((lang) =>
           allowedLanguages.includes(lang)

@@ -76,7 +76,7 @@ export function gdriveFormat(
 
   if (stream.languages.length !== 0) {
     let languages = stream.languages;
-    if (minimalistic) {
+    if (minimalistic && stream.showLanguageEmojis) {
       languages = languages.map(
         (language) => languageToEmoji(language) || language
       );

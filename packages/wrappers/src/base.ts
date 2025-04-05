@@ -255,6 +255,10 @@ export class BaseWrapper {
         indexers: indexer,
         duration: duration,
         personal: personal,
+        showLanguageEmojis:
+          this.userConfig.showLanguageEmojis &&
+          (this.userConfig.formatter === 'gdrive' ||
+            this.userConfig.formatter === 'minimalistic-gdrive'),
         type: stream.infoHash
           ? 'p2p'
           : usenetAge
@@ -353,36 +357,20 @@ export class BaseWrapper {
       ...this.extractCountryFlags(description),
       ...this.extractCountryCodes(description),
     ]
-      .map((codeOrFlag) => {
-        const languageName =
-          emojiToLanguage(codeOrFlag) || codeToLanguage(codeOrFlag);
-        if (languageName) {
-          // Only show emojis if the formatter is gdrive or gdrive minimalistic
-          const shouldShowEmojis = this.userConfig.showLanguageEmojis;
-
-          if (shouldShowEmojis) {
-            const emoji = languageToEmoji(languageName);
-            return emoji || languageName;
-          }
-          // Si no se muestran emojis, devolver el nombre del idioma formateado
-          return languageName
-            .split(' ')
-            .map(
-              (word) =>
-                word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
-            )
-            .join(' ');
-        }
-        return undefined;
-      })
+      .map(
+        (codeOrFlag) =>
+          emojiToLanguage(codeOrFlag) || codeToLanguage(codeOrFlag)
+      )
       .filter((lang) => lang !== undefined)
-      .filter((lang, index, self) => {
-        // Eliminar duplicados basados en el nombre del idioma
-        const normalizedLang = lang.toLowerCase();
-        return (
-          self.findIndex((l) => l.toLowerCase() === normalizedLang) === index
-        );
-      })
+      .map((lang) =>
+        lang
+          .trim()
+          .split(' ')
+          .map(
+            (word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+          )
+          .join(' ')
+      )
       .forEach((lang) => {
         if (lang && !parsedInfo.languages.includes(lang)) {
           parsedInfo.languages.push(lang);

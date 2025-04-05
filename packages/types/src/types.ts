@@ -49,6 +49,7 @@ export interface ParsedStream extends ParsedNameData {
       videoHash?: string;
     };
   };
+  showLanguageEmojis?: boolean;
 }
 
 export interface ErrorStream {

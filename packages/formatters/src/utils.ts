@@ -63,17 +63,25 @@ export function sortPrioritisedLanguages(
         .map((lang) => languageMap.get(lang))
         .filter((lang): lang is string => lang !== undefined),
       // Keep non-prioritized emojis at the end
-      ...languages.filter(
-        (lang) => !prioritisedLanguages.includes(emojiToLanguage(lang) || lang)
-      ),
+      ...languages.filter((lang) => {
+        const langName = emojiToLanguage(lang);
+        return !prioritisedLanguages.includes(langName || lang);
+      }),
     ];
     return sortedLanguages;
   }
 
-  // For regular language names, just sort them with prioritized ones first
+  // For regular language names, normalize them before comparison
+  const normalizedPrioritised = prioritisedLanguages.map((lang) =>
+    lang.toLowerCase()
+  );
   return [
-    ...languages.filter((lang) => prioritisedLanguages.includes(lang)),
-    ...languages.filter((lang) => !prioritisedLanguages.includes(lang)),
+    ...languages.filter((lang) =>
+      normalizedPrioritised.includes(lang.toLowerCase())
+    ),
+    ...languages.filter(
+      (lang) => !normalizedPrioritised.includes(lang.toLowerCase())
+    ),
   ];
 }
 

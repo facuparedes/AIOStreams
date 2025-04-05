@@ -364,20 +364,18 @@ export class BaseWrapper {
             const emoji = languageToEmoji(languageName);
             return emoji || languageName;
           }
-          return languageName;
+          // Si no se muestran emojis, devolver el nombre del idioma formateado
+          return languageName
+            .split(' ')
+            .map(
+              (word) =>
+                word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+            )
+            .join(' ');
         }
         return undefined;
       })
       .filter((lang) => lang !== undefined)
-      .map((lang) =>
-        lang
-          .trim()
-          .split(' ')
-          .map(
-            (word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
-          )
-          .join(' ')
-      )
       .filter((lang, index, self) => {
         // Eliminar duplicados basados en el nombre del idioma
         const normalizedLang = lang.toLowerCase();

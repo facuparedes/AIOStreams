@@ -44,7 +44,7 @@ export function codeToLanguage(code: string): string | undefined {
  */
 const languageEmojiMap: Record<string, string> = {
   multi: '🌎',
-  english: '🇬🇧',
+  english: '🇺🇸',
   japanese: '🇯🇵',
   chinese: '🇨🇳',
   russian: '🇷🇺',
@@ -96,7 +96,6 @@ const languageEmojiMap: Record<string, string> = {
 
 const codeLanguageMap: Record<string, string> = {
   EN: 'english',
-  GB: 'english',
   JA: 'japanese',
   ZH: 'chinese',
   RU: 'russian',

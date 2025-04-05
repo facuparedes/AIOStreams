@@ -592,6 +592,7 @@ export default function Configure() {
         decodedConfig.mediaFlowConfig?.proxiedServices || null
       );
       setApiKey(decodedConfig.apiKey || '');
+      setShowLanguageEmojis(decodedConfig.showLanguageEmojis || false);
     }
 
     const path = window.location.pathname;

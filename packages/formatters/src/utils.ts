@@ -71,17 +71,29 @@ export function sortPrioritisedLanguages(
     return sortedLanguages;
   }
 
-  // For regular language names, normalize them before comparison
-  const normalizedPrioritised = prioritisedLanguages.map((lang) =>
-    lang.toLowerCase()
+  // For regular language names, normalize them using languageEmojiMap
+  const normalizedPrioritised = prioritisedLanguages.map(
+    (lang) =>
+      Object.keys(languageEmojiMap).find(
+        (key) => key.toLowerCase() === lang.toLowerCase()
+      ) || lang
   );
+
   return [
-    ...languages.filter((lang) =>
-      normalizedPrioritised.includes(lang.toLowerCase())
-    ),
-    ...languages.filter(
-      (lang) => !normalizedPrioritised.includes(lang.toLowerCase())
-    ),
+    ...languages.filter((lang) => {
+      const normalizedLang =
+        Object.keys(languageEmojiMap).find(
+          (key) => key.toLowerCase() === lang.toLowerCase()
+        ) || lang;
+      return normalizedPrioritised.includes(normalizedLang);
+    }),
+    ...languages.filter((lang) => {
+      const normalizedLang =
+        Object.keys(languageEmojiMap).find(
+          (key) => key.toLowerCase() === lang.toLowerCase()
+        ) || lang;
+      return !normalizedPrioritised.includes(normalizedLang);
+    }),
   ];
 }
 

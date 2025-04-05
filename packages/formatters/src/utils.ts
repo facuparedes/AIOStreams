@@ -45,56 +45,38 @@ export function sortPrioritisedLanguages(
     return languages;
   }
 
-  // Check if we're dealing with emojis by looking for any emoji in the languageEmojiMap
-  const isEmoji = languages.some((lang) =>
-    Object.values(languageEmojiMap).includes(lang)
+  // Create a map of language names to their priority index
+  const priorityMap = new Map(
+    prioritisedLanguages.map((lang, index) => {
+      const normalized =
+        Object.keys(languageEmojiMap).find(
+          (key) => key.toLowerCase() === lang.toLowerCase()
+        ) || lang;
+      return [normalized, index];
+    })
   );
 
-  if (isEmoji) {
-    // Create a map of language names to their emoji representations
-    const languageMap = new Map(
-      languages.map((lang) => [emojiToLanguage(lang) || lang, lang])
-    );
+  // Sort languages based on their priority index
+  return [...languages].sort((a, b) => {
+    // Convert emojis to language names if needed
+    const langA = emojiToLanguage(a) || a;
+    const langB = emojiToLanguage(b) || b;
 
-    // Sort languages: prioritized first, then the rest
-    const sortedLanguages = [
-      // Get emojis for prioritized languages
-      ...prioritisedLanguages
-        .map((lang) => languageMap.get(lang))
-        .filter((lang): lang is string => lang !== undefined),
-      // Keep non-prioritized emojis at the end
-      ...languages.filter((lang) => {
-        const langName = emojiToLanguage(lang);
-        return !prioritisedLanguages.includes(langName || lang);
-      }),
-    ];
-    return sortedLanguages;
-  }
-
-  // For regular language names, normalize them using languageEmojiMap
-  const normalizedPrioritised = prioritisedLanguages.map(
-    (lang) =>
+    // Normalize language names
+    const normalizedA =
       Object.keys(languageEmojiMap).find(
-        (key) => key.toLowerCase() === lang.toLowerCase()
-      ) || lang
-  );
+        (key) => key.toLowerCase() === langA.toLowerCase()
+      ) || langA;
+    const normalizedB =
+      Object.keys(languageEmojiMap).find(
+        (key) => key.toLowerCase() === langB.toLowerCase()
+      ) || langB;
 
-  return [
-    ...languages.filter((lang) => {
-      const normalizedLang =
-        Object.keys(languageEmojiMap).find(
-          (key) => key.toLowerCase() === lang.toLowerCase()
-        ) || lang;
-      return normalizedPrioritised.includes(normalizedLang);
-    }),
-    ...languages.filter((lang) => {
-      const normalizedLang =
-        Object.keys(languageEmojiMap).find(
-          (key) => key.toLowerCase() === lang.toLowerCase()
-        ) || lang;
-      return !normalizedPrioritised.includes(normalizedLang);
-    }),
-  ];
+    const priorityA = priorityMap.get(normalizedA) ?? Infinity;
+    const priorityB = priorityMap.get(normalizedB) ?? Infinity;
+
+    return priorityA - priorityB;
+  });
 }
 
 /**

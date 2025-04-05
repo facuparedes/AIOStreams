@@ -44,6 +44,33 @@ export function sortPrioritisedLanguages(
   if (!prioritisedLanguages || prioritisedLanguages.length === 0) {
     return languages;
   }
+
+  // Check if we're dealing with emojis by looking for any emoji in the languageEmojiMap
+  const isEmoji = languages.some((lang) =>
+    Object.values(languageEmojiMap).includes(lang)
+  );
+
+  if (isEmoji) {
+    // Create a map of language names to their emoji representations
+    const languageMap = new Map(
+      languages.map((lang) => [emojiToLanguage(lang) || lang, lang])
+    );
+
+    // Sort languages: prioritized first, then the rest
+    const sortedLanguages = [
+      // Get emojis for prioritized languages
+      ...prioritisedLanguages
+        .map((lang) => languageMap.get(lang))
+        .filter((lang): lang is string => lang !== undefined),
+      // Keep non-prioritized emojis at the end
+      ...languages.filter(
+        (lang) => !prioritisedLanguages.includes(emojiToLanguage(lang) || lang)
+      ),
+    ];
+    return sortedLanguages;
+  }
+
+  // For regular language names, just sort them with prioritized ones first
   return [
     ...languages.filter((lang) => prioritisedLanguages.includes(lang)),
     ...languages.filter((lang) => !prioritisedLanguages.includes(lang)),

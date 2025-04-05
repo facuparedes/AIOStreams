@@ -1093,7 +1093,23 @@ export default function Configure() {
             <div className={styles.settingDescription}>
               <h2 style={{ padding: '5px' }}>Formatter</h2>
               <p style={{ padding: '5px' }}>
-                Change how your stream results are formatted.
+                Change how your stream results are f
+                <span
+                  onClick={() => {
+                    if (formatterOptions.includes('imposter')) {
+                      return;
+                    }
+                    showToast(
+                      "What's this doing here....?",
+                      'info',
+                      'ImposterFormatter'
+                    );
+                    setFormatterOptions([...formatterOptions, 'imposter']);
+                  }}
+                >
+                  ◌
+                </span>
+                rmatted.
               </p>
             </div>
             <div className={styles.settingInput}>

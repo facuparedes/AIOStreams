@@ -358,10 +358,7 @@ export class BaseWrapper {
           emojiToLanguage(codeOrFlag) || codeToLanguage(codeOrFlag);
         if (languageName) {
           // Only show emojis if the formatter is gdrive or gdrive minimalistic
-          const shouldShowEmojis =
-            this.userConfig.showLanguageEmojis ??
-            (this.userConfig.formatter === 'gdrive' ||
-              this.userConfig.formatter === 'minimalistic-gdrive');
+          const shouldShowEmojis = this.userConfig.showLanguageEmojis;
 
           if (shouldShowEmojis) {
             const emoji = languageToEmoji(languageName);

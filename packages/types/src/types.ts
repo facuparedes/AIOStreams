@@ -135,7 +135,7 @@ export interface Config {
   prioritisedLanguages: string[] | null;
   excludedLanguages: string[] | null;
   formatter: string;
-  showLanguageEmojis?: boolean;
+  showLanguageEmojis: boolean;
   customFormatter?: {
     splitter: string; // e.g. ' - ', ' | ' etc. the string used to split the tags
     // we need to have a key for where the value has to be determined from the stream data.

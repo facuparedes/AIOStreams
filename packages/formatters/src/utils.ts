@@ -83,6 +83,11 @@ export function sortPrioritisedLanguages(
     const priorityA = priorityMap.get(normalizedA) ?? Infinity;
     const priorityB = priorityMap.get(normalizedB) ?? Infinity;
 
+    if (priorityA === priorityB) {
+      // If priority is the same, maintain the original order
+      return languages.indexOf(a) - languages.indexOf(b);
+    }
+
     return priorityA - priorityB;
   });
 }

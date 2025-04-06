@@ -52,19 +52,63 @@ const GroupedMultiSelect: React.FC<GroupedMultiSelectProps> = ({
     setValues(newGroups);
   };
 
+  // Move a group up
+  const moveGroupUp = (index: number) => {
+    if (index > 0) {
+      const newGroups = [...groups];
+      const temp = newGroups[index];
+      newGroups[index] = newGroups[index - 1];
+      newGroups[index - 1] = temp;
+      setGroups(newGroups);
+      setValues(newGroups);
+    }
+  };
+
+  // Move a group down
+  const moveGroupDown = (index: number) => {
+    if (index < groups.length - 1) {
+      const newGroups = [...groups];
+      const temp = newGroups[index];
+      newGroups[index] = newGroups[index + 1];
+      newGroups[index + 1] = temp;
+      setGroups(newGroups);
+      setValues(newGroups);
+    }
+  };
+
   return (
     <div>
       {groups.map((group, index) => (
         <div key={index} className={styles.languageGroup}>
           <div className={styles.groupHeader}>
             <span>Group {index + 1} (same priority level)</span>
-            <button
-              onClick={() => removeGroup(index)}
-              className={styles.removeGroupButton}
-              type="button"
-            >
-              Remove group
-            </button>
+            <div className={styles.groupActions}>
+              <button
+                onClick={() => moveGroupUp(index)}
+                className={styles.moveButton}
+                type="button"
+                disabled={index === 0}
+                title="Move group up (increase priority)"
+              >
+                ↑
+              </button>
+              <button
+                onClick={() => moveGroupDown(index)}
+                className={styles.moveButton}
+                type="button"
+                disabled={index === groups.length - 1}
+                title="Move group down (decrease priority)"
+              >
+                ↓
+              </button>
+              <button
+                onClick={() => removeGroup(index)}
+                className={styles.removeGroupButton}
+                type="button"
+              >
+                Remove group
+              </button>
+            </div>
           </div>
           {isClient ? (
             <Select

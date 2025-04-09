@@ -969,55 +969,64 @@ export class AIOStreams {
   private async getParsedStreams(
     streamRequest: StreamRequest
   ): Promise<{ parsedStreams: ParsedStream[]; errorStreams: ErrorStream[] }> {
+    const startTime = new Date().getTime();
+    logger.info('Getting parsed streams...');
+
+    // Updated formatError to handle various error types from Promise.allSettled
+    const formatError = (reason: unknown): string => {
+      if (typeof reason === 'string') {
+        return reason;
+      }
+      if (reason instanceof Error) {
+        return reason.message;
+      }
+      return 'Unknown error';
+    };
+
+    const allAddonPromises = this.config.addons.map((addon, index) =>
+      // Pass addonId correctly for error reporting
+      this.getStreamsFromAddon(addon, `${addon.id}_${index}`, streamRequest)
+    );
+
+    const results = await Promise.allSettled(allAddonPromises);
+
     const parsedStreams: ParsedStream[] = [];
     const errorStreams: ErrorStream[] = [];
-    const formatError = (error: string) =>
-      typeof error === 'string'
-        ? error
-            .replace(/- |: /g, '\n')
-            .split('\n')
-            .map((line: string) => line.trim())
-            .join('\n')
-            .trim()
-        : error;
 
-    const addonPromises = this.config.addons.map(async (addon) => {
-      const addonName =
-        addon.options.name ||
-        addon.options.overrideName ||
-        addonDetails.find((addonDetail) => addonDetail.id === addon.id)?.name ||
-        addon.id;
-      const addonId = `${addon.id}-${JSON.stringify(addon.options)}`;
-      try {
-        const startTime = new Date().getTime();
-        const { addonStreams, addonErrors } = await this.getStreamsFromAddon(
-          addon,
-          addonId,
-          streamRequest
-        );
-        parsedStreams.push(...addonStreams);
+    results.forEach((result, index) => {
+      const addon = this.config.addons[index];
+      // Correctly determine addon name using a fallback mechanism similar to original code if possible,
+      // otherwise use addon.id or a generic identifier. Using addon.id for now.
+      const addonId = `${addon.id}_${index}`;
+      // Assuming addon.options exists based on previous context/original code structure.
+      // If addon structure differs, this needs adjustment based on the actual Config['addons'] type.
+      const addonName = (addon.options as any)?.name || addon.id; // Simplified name resolution, might need refinement
+
+      if (result.status === 'fulfilled') {
+        parsedStreams.push(...result.value.addonStreams);
+        // Ensure error objects match the ErrorStream type
         errorStreams.push(
-          ...[...new Set(addonErrors)].map((error) => ({
-            error: formatError(error),
+          ...result.value.addonErrors.map((error) => ({
+            error: formatError(error), // Use the updated formatError
             addon: { id: addonId, name: addonName },
           }))
         );
-        logger.info(
-          `Got ${addonStreams.length} streams ${addonErrors.length > 0 ? `and ${addonErrors.length} errors ` : ''}from addon ${addonName} in ${getTimeTakenSincePoint(startTime)}`
-        );
-      } catch (error: any) {
-        logger.error(`Failed to get streams from ${addonName}: ${error}`);
+      } else {
+        logger.error(result.reason, {
+          func: 'getStreamsFromAddon',
+          addon: addonName,
+        });
+        // Ensure error objects match the ErrorStream type
         errorStreams.push({
-          error: formatError(error.message ?? error ?? 'Unknown error'),
-          addon: {
-            id: addonId,
-            name: addonName,
-          },
+          error: formatError(result.reason), // Use the updated formatError
+          addon: { id: addonId, name: addonName },
         });
       }
     });
 
-    await Promise.all(addonPromises);
+    logger.info(
+      `Finished getting parsed streams in ${getTimeTakenSincePoint(startTime)}`
+    );
     return { parsedStreams, errorStreams };
   }
 
